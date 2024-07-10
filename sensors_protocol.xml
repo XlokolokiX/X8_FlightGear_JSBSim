@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<PropertyList>
+<generic>
+   <output>
+       <line_separator>newline</line_separator>
+       <var_separator>tab</var_separator>
+
+       <chunk>
+          <node>/instrumentation/gps/indicated-latitude-deg</node>
+          <name>gps-latitude</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+       <chunk>
+          <node>/instrumentation/gps/indicated-longitude-deg</node>
+          <name>gps-longitude</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/instrumentation/gps/indicated-altitude-ft</node>
+          <name>gps-altitude-ft</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/instrumentation/altimeter/indicated-altitude-ft</node>
+          <name>altimeter-altitude</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/instrumentation/attitude-indicator/indicated-pitch-deg</node>
+          <name>attitude-pitch</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/instrumentation/attitude-indicator/indicated-roll-deg</node>
+          <name>attitude-roll</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/instrumentation/magnetic-compass/indicated-heading-deg</node>
+          <name>magnetic-compass</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+   </output>
+ </generic>
+</PropertyList>
