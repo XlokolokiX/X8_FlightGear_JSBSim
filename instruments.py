@@ -11,19 +11,23 @@ class Instruments:
         self.magneticHeading:float = 0.0
 
     def __UpdateInstrumentData(self):
-        data, addr = self.listener_socket.recvfrom(2048)
-        data = data.decode('utf-8').removesuffix('\n').split('\t')
-        data = [float(num) for num in data]
-        self.gps[0] = data[0]       #latitude
-        self.gps[1] = data[1]       #longitude
-        self.gpsAltitude = data[2]       #altitude gps (M)
-        self.altitude = data[3]     #altitude sensor
-        self.attitude[0] = data[4]  #Pitch
-        self.attitude[1] = data[5]  #Roll
-        self.magneticHeading = data[6] #Heading
+        try:
+            data, addr = self.listener_socket.recvfrom(2048)
+            data = data.decode('utf-8').removesuffix('\n').split('\t')
+            data = [float(num) for num in data]
+            self.gps[0] = data[0]           #latitude
+            self.gps[1] = data[1]           #longitude
+            self.gpsAltitude = data[2]      #altitude gps (M)
+            self.altitude = data[3]         #altitude sensor
+            self.attitude[0] = data[4]      #Pitch
+            self.attitude[1] = data[5]      #Roll
+            self.magneticHeading = data[6]  #Heading
+        except socket.error as e:
+            print(f'Error receiving data: {e}')
+            return None
         return data
     
-    def __radians_to_mercator(self, lat_rad, lon_rad, radius=6371000):
+    def __radians_to_mercator(self, lat_rad:float, lon_rad:float, radius=6371000):
         x = radius * lon_rad
         y = radius * math.log(math.tan(math.pi / 4 + lat_rad / 2))
         return [x, y]
@@ -47,3 +51,9 @@ class Instruments:
     def getmagneticHeading(self):
         self.__UpdateInstrumentData()
         return self.magneticHeading
+    
+    def __del__(self):
+        try:
+            self.listener_socket.close()
+        except socket.error as e:
+            print(f'Error closing listener socket: {e}')

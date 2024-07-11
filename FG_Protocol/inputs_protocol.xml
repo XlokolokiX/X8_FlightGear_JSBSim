@@ -27,6 +27,7 @@
     <node>/controls/engines/engine/throttle</node>
     <format>%f</format>
    </chunk>
+   
  </input>
  </generic>
 </PropertyList>

@@ -3,22 +3,30 @@ from instruments import Instruments
 
 class Plane:
     def __init__(self, Address:str = 'localhost', listener_Port:int = 5500, writing_Port:int = 5501):
-        self.__Address = Address
-        self.__listener_Port = listener_Port
-        self.__writing_Port = writing_Port
-        self.writing_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-
-        listener_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-        listener_socket.bind((self.__Address, self.__listener_Port))
-        self.instruments = Instruments(listener_socket=listener_socket)
-
         self.ailerons = 0.0
         self.elevator = 0.0
         self.throttle = 0.0
+        self.__Address = Address
+        self.__listener_Port = listener_Port
+        self.__writing_Port = writing_Port
+
+        try:
+            self.writing_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+            listener_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+            listener_socket.bind((self.__Address, self.__listener_Port))
+            self.instruments = Instruments(listener_socket=listener_socket)
+        except socket.error as e:
+            print(f'Failed to create bind socket: {e}')
+            raise
 
     def __updatePLane(self):
         data = f'{self.ailerons},{self.elevator},{self.throttle}\n'
-        self.writing_socket.sendto(data.encode('utf-8'), (self.__Address, self.__writing_Port))
+        try:
+            self.writing_socket.sendto(data.encode('utf-8'), (self.__Address, self.__writing_Port))
+            return True
+        except socket.error as e:
+            print(f'Error sending control data: {e}')
+            return False
 
     def setAilerons(self, value:float = 0.0):
         self.ailerons = value
@@ -29,4 +37,10 @@ class Plane:
     def setThrottle(self, value:float = 0.0):
         self.throttle = value
         self.__updatePLane()
+
+    def __del__(self):
+        try:
+            self.writing_socket.close()
+        except socket.error as e:
+            print(f'Error closing Writing Socket: {e}')
         
