@@ -7,14 +7,11 @@ class Plane:
         self.elevator = 0.0
         self.throttle = 0.0
         self.__Address = Address
-        self.__listener_Port = listener_Port
         self.__writing_Port = writing_Port
 
         try:
             self.writing_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-            listener_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
-            listener_socket.bind((self.__Address, self.__listener_Port))
-            self.instruments = Instruments(listener_socket=listener_socket)
+            self.instruments = Instruments(address = Address, listener_port = listener_Port)
         except socket.error as e:
             print(f'Failed to create bind socket: {e}')
             raise
@@ -37,8 +34,13 @@ class Plane:
     def setThrottle(self, value:float = 0.0):
         self.throttle = value
         self.__updatePLane()
+    def getInstruments(self):
+        return self.instruments
 
     def __del__(self):
+        self.setAilerons(0)
+        self.setElevator(0)
+        self.setThrottle(0)
         try:
             self.writing_socket.close()
         except socket.error as e:

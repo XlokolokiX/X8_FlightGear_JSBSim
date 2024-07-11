@@ -2,8 +2,9 @@ import socket
 import math
 
 class Instruments:
-    def __init__(self, listener_socket:socket):
-        self.listener_socket = listener_socket
+    def __init__(self, address, listener_port):
+        self.__address = address
+        self.__listener_port = listener_port
         self.gps:float = [0.0,0.0]
         self.gpsAltitude:float = 0.0
         self.altitude:float = 0.0
@@ -12,7 +13,11 @@ class Instruments:
 
     def __UpdateInstrumentData(self):
         try:
-            data, addr = self.listener_socket.recvfrom(2048)
+            listener_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+            listener_socket.bind((self.__address, self.__listener_port))
+            data, addr = listener_socket.recvfrom(170)
+            listener_socket.close()
+
             data = data.decode('utf-8').removesuffix('\n').split('\t')
             data = [float(num) for num in data]
             self.gps[0] = data[0]           #latitude
@@ -51,9 +56,3 @@ class Instruments:
     def getmagneticHeading(self):
         self.__UpdateInstrumentData()
         return self.magneticHeading
-    
-    def __del__(self):
-        try:
-            self.listener_socket.close()
-        except socket.error as e:
-            print(f'Error closing listener socket: {e}')
