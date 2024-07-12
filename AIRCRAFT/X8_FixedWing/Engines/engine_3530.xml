@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!--
+  File:     engine_3530.xml
+  Author:   Mercado Ignacio
+-->
+<electric_engine name="electric">
+ <power unit="WATTS">  500 </power>
+</electric_engine>

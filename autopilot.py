@@ -20,16 +20,16 @@ class Autopilot:
         :param altitude: Desired altitude [feet]
         :return: None
         '''
-        kp = 0.0005
-        ki = 0.025
+        kp = 0.005
+        ki = 0.015
         kd = 0
         error = altitude - self.plane.instruments.getGPSaltitude()
 
         altitude_controller = PID(kp, ki, kd)
         output = altitude_controller(error)
-        output = self.__saturation(output, low_limit = -10*(math.pi/180), high_limit = 10*(math.pi/180))#Prevent excesive Pitch
+        output = self.__saturation(output, low_limit = -15*(math.pi/180), high_limit = 15*(math.pi/180))#Prevent excesive Pitch
         self.plane.setElevator(output)
-        self.heading_hold(180)
+        self.heading_hold(190)
         return output
     
     def heading_hold(self, heading:float):
@@ -38,9 +38,9 @@ class Autopilot:
         :param heading: Desired heading [degree]
         :return: None
         '''
-        kp = 0.001
-        ki = 0.08
-        kd = 0.05
+        kp = 0.02
+        ki = 0.05
+        kd = 0.005
         error = heading - self.plane.instruments.getmagneticHeading()
         heading_controller = PID(kp, ki, kd)
         output = heading_controller(-error)

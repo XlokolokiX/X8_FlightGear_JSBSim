@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<!--
+  File:     engine_4255.xml
+  Author:   Mercado Ignacio
+-->
+<electric_engine name="electric">
+ <power unit="WATTS">  950 </power>
+</electric_engine>

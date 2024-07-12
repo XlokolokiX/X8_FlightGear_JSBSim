@@ -1,0 +1,677 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="http://jsbsim.sourceforge.net/JSBSim.xsl" type="text/xsl"?>
+<fdm_config name="rascal" version="2.0" release="BETA"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://jsbsim.sourceforge.net/JSBSim.xsd">
+
+
+    <!-- Metadata sobre el archivo. Este modelo es una adaptacion del modelo creado por Alexander Quessy. 
+            (https://github.com/AOS55/Fixedwing-Airsim).
+            Las modificacion realizadas fueron llevadas a cabo con datos obtenidos de las referencias 
+            citadas y por datos recabados de simulaciones propias en los software XFOIL y XFLR5.-->
+    <fileheader>
+        <author> Mercado Ignacio </author>
+        <filecreationdate> 2024-07-01 </filecreationdate>
+        <version> $V.1.0 $ </version>
+        <description> Flight Dynamic Model of a Skywalker X8 </description>
+        <reference title="[1]High angle of attack landing of an unmanned aerial vehicle." />
+        <reference title="[2]Aerodynamic modeling of the Skywalker X8 Fixed-Wing Unmanned Aerial Vehicle" />
+        <reference title="[3]Modelado y simulación del Skywalker X8." />
+        <reference title="[4]Skywalker X8: Accurate aerodynamic model, scale 1:1(https://grabcad.com/library/skywalker-x8-2)" />
+    </fileheader>
+
+    <!-- Métricas del modelo -->
+    <metrics>
+        <wingarea unit="M2"> 0.75 </wingarea> <!-- Área del ala en metros cuadrados -->
+        <wingspan unit="M"> 2.10 </wingspan> <!-- Envergadura del ala en metros -->
+        <chord unit="M"> 0.3571 </chord> <!-- Cuerda media del ala en metros -->
+
+        <!-- Los siguientes 3 parámetros son nulos, ya que la configuración del X8 es del tipo ala
+        volante, por lo tanto no tiene empenaje.-->
+        <htailarea unit="M2"> 0 </htailarea> <!-- Área del estabilizador horizontal -->
+        <htailarm unit="M"> 0 </htailarm> <!-- Brazo de palanca entre centros del estabilizador y delconjunto -->
+        <vtailarea unit="M2"> 0 </vtailarea> <!-- Área del timón -->
+        <vtailarm unit="FT"> 0 </vtailarm>
+
+        <location name="AERORP" unit="M"> <!-- Punto de referencia aerodinámico -->
+            <x> 0.94996 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </location>
+
+        <location name="EYEPOINT" unit="M"> <!-- Punto de vista del piloto -->
+            <x> 0.2 </x>
+            <y> 0.0 </y>
+            <z> -0.1 </z>
+        </location>
+
+        <location name="VRP" unit="M"> <!-- Punto de referencia visual -->
+            <x> 0.2 </x>
+            <y> 0.0 </y>
+            <z> -0.1 </z>
+        </location>
+
+    </metrics>
+
+    <!-- Propiedades de masa y balance -->
+    <mass_balance>
+        <ixx unit="KG*M2"> 1.2290 </ixx>
+        <iyy unit="KG*M2"> 0.1702 </iyy>
+        <izz unit="KG*M2"> 0.8808 </izz>
+        <ixz unit="KG*M2"> 0.9343 </ixz>
+        <emptywt unit="KG"> 3.364 </emptywt> <!-- Peso vacío en kilogramos(con todos los componentes
+        pero sin carga) -->
+        <location name="CG" unit="M"> <!-- Centro de gravedad -->
+            <x> 0.92456 </x>
+            <y> 0.0 </y>
+            <z> 0.0 </z>
+        </location>
+
+        <pointmass name="payload"> 
+            <weight unit="KG"> 0.3 </weight>
+            <location name="payload" unit="M">
+                <x> 0 </x>
+                <y> 0 </y>
+                <z> 0 </z>
+            </location>
+        </pointmass>
+        <pointmass name="payload"> <!-- Agrego la distribución de masas dadas en [1].-->
+            <weight unit="KG"> 0.464 </weight>
+            <location name="payload" unit="M">
+                <x> 1.02 </x>
+                <y> -0.25 </y>
+                <z> -0.25654 </z>
+            </location>
+        </pointmass>
+        <pointmass name="payload"> 
+            <weight unit="KG"> 0.454 </weight>
+            <location name="payload" unit="M">
+                <x> 1.02 </x>
+                <y> 0.25 </y>
+                <z> -0.25 </z>
+            </location>
+        </pointmass>
+
+    </mass_balance>
+
+    <!-- Reacciones del modelo en el suelo. En este caso, las reacciones son totalmente diferentes
+     al proyecto original. Se uso como referencia las reacciones de un Schempp-Hirth Arcus (planeador alemán) 
+     ajustadas al modelo tratado(medidas tomadas de [4]). Se colocaron reacciones  del tipo estructurales(para el fuselaje y cada semiala).
+     Aunque en la realidad el modelo no posea tren de aterrizaje, es menester incluirlo para poder hacer maniobras, ya que
+     sino se deberia modelar un sistema de catapulta para poder despegar.  -->
+     <ground_reactions>
+
+        <contact type="BOGEY" name="LEFT_MLG"> <!-- Tren aterrizaje de semiala izquierda.-->
+            <location unit="M">
+                <x> 1.02 </x>
+                <y> -0.25 </y>
+                <z> -0.25654 </z>
+            </location>
+            <static_friction> 0.8 </static_friction> <!-- Coeficiente de rozamiento estático del contacto.-->
+            <dynamic_friction> 0.5 </dynamic_friction> <!-- Coeficiente de rozamiento dinámico del contacto.-->
+            <rolling_friction> 0.02 </rolling_friction> <!-- Coeficiente de rozamiento de rodadura del contacto.-->
+            <spring_coeff unit="N/M"> 1751 </spring_coeff> <!-- Cons. de resorte. Cuatifica la
+            fuerza necesaria para deformar el contacto. Como es un efecto no deseado le coloco un valor alto. -->
+            <damping_coeff unit="N/M/SEC"> 260 </damping_coeff> <!-- El valor del coef. de amortiguamiento critico es Ccr=2*sqrt(mk), siendo k 
+            la constante del resorte, para el caso nuesto Ccr=2*sqrt(3.61*1751)=159Ns/m-->
+            <max_steer unit="DEG"> 0.0 </max_steer> <!-- Es el rango de rotación que posee el contacto.-->
+            <brake_group> LEFT </brake_group> <!-- En este caso, se asigna al contacto el grupo de frenado izquierdo, y sus 
+            propiedades son las definidas arriba, aunque se pueden modificar mas parámetros en archivos internos del JSBSim.-->
+            <retractable>0</retractable> <!-- El tren de aterrizaje es no fijo.-->
+            
+        </contact>
+
+        <contact type="BOGEY" name="RIGHT_MLG"> <!-- Tren aterrizaje de semiala derecha.-->
+            <location unit="M">
+                <x> 1.02 </x>
+                <y> 0.25 </y>
+                <z> -0.25 </z>
+            </location>
+            <static_friction> 0.8 </static_friction>
+            <dynamic_friction> 0.5 </dynamic_friction>
+            <rolling_friction> 0.02 </rolling_friction>
+            <spring_coeff unit="LBS/FT"> 120 </spring_coeff>
+            <damping_coeff unit="LBS/FT/SEC"> 20 </damping_coeff>
+            <max_steer unit="DEG"> 0.0 </max_steer>
+            <brake_group> RIGHT </brake_group>
+            <retractable>0</retractable>
+        </contact>
+        <contact type="BOGEY" name="TAIL_LG"> <!-- Tren aterrizaje del empenaje.-->
+            <location unit="M">
+                <x> 1.75 </x>
+                <y> 0 </y>
+                <z>-0.11 </z>
+            </location>
+            <static_friction> 0.8 </static_friction>
+            <dynamic_friction> 0.5 </dynamic_friction>
+            <rolling_friction> 0.02 </rolling_friction>
+            <spring_coeff unit="LBS/FT"> 24 </spring_coeff>
+            <damping_coeff unit="LBS/FT/SEC"> 20 </damping_coeff>
+            <max_steer unit="DEG"> 360.0 </max_steer>
+            <brake_group> NONE </brake_group>
+            <retractable>0</retractable>
+        </contact>
+        <contact type="BOGEY" name="NOSE_LG"> <!-- Tren aterrizaje de la nariz.-->
+            <location unit="M">
+                <x>0.254</x>
+                <y>0</y>
+                <z>-0.211</z>
+            </location>
+            <static_friction> 0.8 </static_friction>
+            <dynamic_friction> 0.5 </dynamic_friction>
+            <rolling_friction> 0.02 </rolling_friction>
+            <spring_coeff unit="LBS/FT"> 24 </spring_coeff>
+            <damping_coeff unit="LBS/FT/SEC"> 20 </damping_coeff>
+            <max_steer unit="DEG"> 360.0 </max_steer>
+            <brake_group> NONE </brake_group>
+            <retractable>0</retractable>
+        </contact>
+        <contact type="STRUCTURE" name="LEFT_WING"> <!-- Contacto de la semiala izquierda -->
+            <location unit="M">
+                <x> 0.5 </x>
+                <y> -0.98 </y>
+                <z> -0.05 </z>
+            </location>
+            <static_friction> 1 </static_friction> <!-- Coef. de rozamiento est. para el contacto. -->
+            <dynamic_friction> 1 </dynamic_friction> <!-- Coef. de rozamiento din. para el contacto. -->
+            <spring_coeff unit="N/M"> 10000 </spring_coeff> <!-- Coef. de resorte. Cuatifica la
+            fuerza necesaria para deformar el contacto. Como es un efecto no deseado le coloco un
+            valor alto. -->
+            <damping_coeff unit="LBS/FT/SEC"> 100 </damping_coeff> <!-- Coef. de amortiguación.
+            Cuatifica la resistencia ante oscilaciones. El valor corresponde al planeador usado de
+            referencia. -->
+        </contact>
+		
+		<contact
+            type="STRUCTURE" name="RIGHT_WING">
+            <location unit="M">
+                <x> 0.5 </x>
+                <y> 0.98 </y>
+                <z> -0.05 </z>
+            </location>
+            <static_friction> 1 </static_friction>
+            <dynamic_friction> 1 </dynamic_friction>
+            <spring_coeff unit="N/M"> 10000 </spring_coeff> <!-- Coef. de resorte. Cuatifica la
+            fuerza necesaria para deformar el contacto. Como es un efecto no deseado le coloco un
+            valor alto. -->
+            <damping_coeff unit="LBS/FT/SEC"> 100 </damping_coeff> <!-- Coef. de amortiguación.
+            Cuatifica la resistencia ante oscilaciones. El valor corresponde al planeador usado de
+            referencia. -->
+        </contact>
+		
+		<contact
+            type="STRUCTURE" name="BELLY"> <!-- when the main gear is retracted -->
+            <location unit="M">
+                <x> 0.15 </x>
+                <y> 0.00 </y>
+                <z> -0.1 </z>
+            </location>
+            <static_friction> 1 </static_friction>
+            <dynamic_friction> 1 </dynamic_friction>
+            <spring_coeff unit="N/M"> 10000 </spring_coeff> <!-- Coef. de resorte. Cuatifica la
+            fuerza necesaria para deformar el contacto. Como es un efecto no deseado le coloco un
+            valor alto. -->
+            <damping_coeff unit="LBS/FT/SEC"> 100 </damping_coeff> <!-- Coef. de amortiguación.
+            Cuatifica la resistencia ante oscilaciones. El valor corresponde al planeador usado de
+            referencia. -->
+        </contact>
+    </ground_reactions>
+
+    <!-- Sistema de propulsión. El motor puede ser(según kits oficiales del aeromodelo) Motor 3530
+    kv520("engine_3530") ó Motor 4255 kv520("engine_4255"). Se puede cambiar en *.-->
+    <propulsion>
+        <engine file="engine_4255.xml"> <!-- *: Archivo XML del motor eléctrico -->
+            <location unit="M">
+                <x>0.82</x>
+                <y>0.0</y>
+                <z>0.0</z>
+            </location>
+            <orient unit="DEG">
+                <roll>0.0</roll>
+                <pitch>0.0</pitch>
+                <yaw>0.0</yaw>
+            </orient>
+            <feed> 0 </feed> <!-- Indica el tanque de combustible que alimentara al motor. En nuestro
+            caso el valor es cero(no existe tanque de combustible). -->
+
+            <!-- La hélice que se usa en el X8 es normalmente la 14x8F -->
+            <thruster file="14x8_4255.xml"> <!-- Archivo XML de la hélice. Si se usa
+                "engine_4255.xml" se debe usar "14x8_4255.xml".Si se usa "engine_3530.xml" se debe
+                usar "14x8_3530.xml". -->
+                <sense> 1 </sense>  <!-- El sentido de giro es horario(1). En caso de que la rotación
+                sea antihoraria, sense=1-->
+                <location unit="M">
+                    <x>0.825</x>
+                    <y>0.0</y>
+                    <z>0.0</z>
+                </location>
+                <orient unit="DEG">
+                    <roll>0.0</roll>
+                    <pitch>0.0</pitch>
+                    <yaw>0.0</yaw>
+                </orient>
+                <p_factor>1.0</p_factor> <!-- Este efecto es caracteristico de cada hélice y es un factor que provoca tracción asimetrica en las fases de vuelo.-->
+            </thruster>
+        </engine>
+    </propulsion>
+
+    <flight_control name="x8"> <!-- Defino el sistema de control de vuelo. -->
+        <channel name="Pitch"> <!-- Control de vuelo para el pitch. Solo se usa el elevador
+            (flaperones) ya que no tenemos timón en el modelo.-->
+            <summer name="fcs/pitch-sum"> <!-- Lee y procesa la entrada de datos para el control del
+                eje de cabeceo. -->
+                <input>fcs/elevator-cmd-norm</input> <!-- Entrada del comando del elevador normalizado. -->
+                <clipto> <!-- Limito valores de entrada de comando. -->
+                    <min>-1</min>
+                    <max>1</max>
+                </clipto>
+            </summer>
+
+            <aerosurface_scale name="fcs/elevator-control"> <!--Mapea
+                el input dado en el rango de deflexiones permitidas por el elevador.-->
+                <input>fcs/pitch-sum</input>
+                <range> <!-- Rango de deflexion para el elevador en grados. Datos tomados de [1]. -->
+                    <min>-30</min>
+                    <max>+35</max>
+                </range>
+                <gain>0.01745</gain> <!-- Factor de conversion para pasar la deflexión de elevador a
+                radianes -->
+            </aerosurface_scale>
+
+            <actuator name="fcs/elevator-actuator"> <!-- Sirve justamente para ejercer el movimiento
+                de deflexión del elevador. Tanto el control como el actuador
+                 se definen por separado porque se puede agregar mas parametros al actuador(ya que es basicamente un
+                servomotor) como lo pueden ser delay, ruido, etc.-->
+                <input>fcs/elevator-control</input>
+                <clipto>
+                    <min>-0.52</min>
+                    <max>0.61</max>
+                </clipto>
+                <output>fcs/elevator-pos-rad</output> <!-- La salida final es la posición del elevador dada al simulador
+                en radianes.-->
+            </actuator>
+        </channel>
+
+        <!-- No comento cada linea porque es basicamente el mismo control que se realiza para el
+        pitch.-->
+        <channel name="Roll"> <!-- Control de vuelo para el rollido Solo se usa el elevador
+            (flaperones) ya que no tenemos timón en el modelo.-->
+            <summer name="fcs/roll-sum">
+                <input>fcs/aileron-cmd-norm</input>
+                <clipto>
+                    <min>-1</min>
+                    <max>1</max>
+                </clipto>
+            </summer>
+
+            <aerosurface_scale name="fcs/left-aileron-control">
+                <input>fcs/roll-sum</input>
+                <range>
+                    <min>-30</min>
+                    <max>35</max>
+                </range>
+                <gain>0.01745</gain>
+            </aerosurface_scale>
+
+            <actuator name="fcs/left-aileron-actuator">
+                <input>fcs/left-aileron-control</input>
+                <output>fcs/left-aileron-pos-rad</output>
+            </actuator>
+
+            <aerosurface_scale name="fcs/right-aileron-control">
+                <input>fcs/roll-sum</input>
+                <range>
+                    <min>-30</min>
+                    <max>35</max>
+                </range>
+                <gain>0.01745</gain>
+            </aerosurface_scale>
+
+            <actuator name="fcs/right-aileron-actuator">
+                <input>fcs/right-aileron-control</input>
+                <output>fcs/right-aileron-pos-rad</output>
+            </actuator>
+
+            <summer name="fcs/effective-aileron-pos"> <!-- Para rollear, claramente los alerones
+                deben flexionar en sentidos opuestos, esto realiza la presente funcion.-->
+                <input>fcs/left-aileron-pos-rad</input>
+                <input>-fcs/right-aileron-pos-rad</input>
+                <output>fcs/effective-aileron-pos-rad</output>
+            </summer>
+        </channel>
+
+    </flight_control>
+
+    <aerodynamics>
+
+        <axis name="DRAG"> 
+            <!-- Resistencia aerodinámica. En este caso hay que saber que este
+            apartado, aerodinamicamente hablando,
+            se divide en dos grandes rasgos, la resistencia parásita (aquella que no depende de la
+            sustentación) que a su vez se 
+            desglosa en resistencia de fricción (aquella que se da por efectos de la viscosidad sobre la
+            superficie mojada) y la 
+            resistencia de presión (aquella que se da por justamente la presión que ejerce el flujo libre sobre
+            la superficie).
+            Esta parte de la resistencia se incluye en el coeficiente CDo. La otra resistencia que existe es la
+            resistencia 
+            inducida, que es aquella que se produce por los efectos de la sustentacion y los diferentes
+            momentos que puede realizar el 
+            modelo. En este caso la curva es del tipo polinómica, no tengo mucha formación en este campo, mas
+            allá de lo basico, es por esto,
+            que algunos coeficientes no logre tener el criterio teorico suficiente para su elegibilidad y son
+            solamente una copia de datos dados
+            en la referencia [2]. El método por el cual se cálcula la res. ind. es mediante la suma de la
+            resistencia de cada fuerza y momento, 
+            cada una de estas resistencias se representa generalmente mediante un polinomio de 2do grado con
+            variable independiente CL. Cada
+            coeficiente de cada término(CDalpha, CDalpha2, CDbetha, etc.) son los valores obtenidos en los
+            analisis aerodinamicos.-->
+
+            <function name="aero/coefficient/CDo"> <!-- Coefiencte de resistencia parásita.-->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <value>0.0152</value> <!-- Valor del coeficiente. [2]. Promediado entre datos
+                    empíricos y simulados.-->
+                </product>
+            </function>
+
+            <function name="aero/coefficient/CDalpha"> <!-- Coeficiente lineal del polinomio de
+                resistencia inducida debida al ángulo de ataque.-->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>aero/alpha-rad</property>
+                    <value>0.0791</value>
+                </product>
+            </function>
+
+            <!-- <function name="aero/coefficient/CDalpha2">--><!-- Coeficiente cuadrático del polinomio de
+                resistencia inducida debida al ángulo de ataque.-->
+            <!-- <product>-->
+            <!-- <property>aero/qbar-area</property>-->
+            <!-- <property>aero/alpha-rad</property>-->
+            <!-- <property>aero/alpha-rad</property>-->
+            <!--<value>1.06</value> -->
+            <!-- </product>-->
+            <!-- </function> --> <!-- Por alguna razón los términos cuadraticos de la resistencia inducida no en esta versión de JSBSim estan dando problemas en el motor de fisicas.-->
+                          
+
+            <function name="aero/coefficient/CDbeta"> <!-- Coeficiente lineal del polinomio de
+                resistencia inducida debida al ángulo de guiñada.-->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <value>-0.0058</value>
+                </product>
+            </function>
+            
+            <!-- <function name="aero/coefficient/CDbeta2">--><!-- Coeficiente cuadrático del polinomio de
+                resistencia inducida debida al ángulo de guiñada.-->
+            <!--<product> -->
+            <!-- <property>aero/qbar-area</property>-->
+            <!-- <property>aero/mag-beta-rad</property>-->
+            <!-- <property>aero/mag-beta-rad</property>-->
+            <!-- <value>0.148</value>-->
+            <!-- </product>-->
+            <!-- </function>--><!-- Por alguna razón los términos cuadraticos de la resistencia inducida no en esta versión de JSBSim estan dando problemas en el motor de fisicas.-->
+             
+            
+            <function name="aero/coefficient/CDq"> <!-- Coeficiente de resistencia debido al cambio
+                en el momento de cabeceo.-->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>velocities/q-aero-rad_sec</property>
+                    <property>aero/ci2vel</property> <!-- Unfortunately, neither XFLR5 nor the wind tunnel
+                    testing is able to estimate the increase in drag from pitch rate, CDq.-->
+                    <value>0.0</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/CDe"> <!-- Coeficiente de resistencia debido a la
+                deflexión del elevador.-->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>fcs/mag-elevator-pos-rad</property>
+                    <value>0.0633</value>
+                </product>
+            </function>
+
+        </axis>
+
+        <axis name="SIDE"> 
+            <!-- Fuerza lateral. Corresponde basicamente a la suma de los efectos
+            producidos por cada movimiento que puede realizar el modelo. En este caso se podría
+            incluir el coeficiente de fuerza lateral parásito, pero este es nulo debido a que el modelo fue
+            diseñado para tener estabilidad aerodinamica, lo cual implica que en una configuración
+            limpia(sin accionamiento de hipersustentadores) el modelo no deberia tener tendencia a sentir una
+            fuerza lateral.-->
+
+            <function name="aero/coefficient/CYb"> <!-- Coeficiente de fuerza lateral debido a la
+                guiñada. Un ángulo de guiñada crea una fuerza lateral debido a la diferencia de
+                presión en los lados de la aeronave.-->
+                <product>
+                    <property>aero/qbar-area</property>
+                    <property>aero/beta-rad</property>
+                    <value>-0.21</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/CYp"> <!-- Coeficiente de fuerza lateral debido al
+                rollido. Un rollido provoca diferencias en la sustentación en las alas, creando una
+                fuerza lateral.-->
+                <product>
+                    <property>aero/qbar-area</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/p-aero-rad_sec</property>
+                    <value>-0.1374</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/CYr"> <!-- Coeficiente de fuerza lateral debido a la
+                guiñada. La asimetria de flujo respecto al plano longitudinal del modelo genera
+                fuerzas laterales.-->
+                <product>
+                    <property>aero/qbar-area</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/r-aero-rad_sec</property>
+                    <value>0.09</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/CYda"> <!-- Coeficiente de fuerza lateral a la deflexion
+                de los alerones.-->
+                <product>
+                    <property>aero/qbar-area</property>
+                    <property>fcs/effective-aileron-pos</property>
+                    <value>-0.0696</value>
+                </product>
+            </function>
+
+        </axis>
+
+        <axis name="LIFT"> 
+            <!-- Sustentación. Para este caso, se calcula la fuerza de sustentación
+            como al suma del aporte de cada coeficiente de sustentación(Claramente, para quer sea
+            una fuerza estos estan multiplicados por la presión dinámica). -->
+            <!-- En resumen y de forma muy generalizada, la fuerza de sustentación es igual a un
+            coefienciete CL multiplicado por la presión dinámica y la superficie de referencia donde actua dicha presióm. Pero
+            además este coeficiente no es constante, sino que varía a lo largo del tiempo, es decir, CL es una función donde cada
+            término representa el aporte de diferentes actuaciones y fenómenos que tiene el avión y afectan de manera directa a dicho
+            coeficiente.-->
+            <function name="aero/coefficient/CLalpha">
+                <product>
+                    <property>aero/qbar-psf</property> <!-- Presión dinámica. PSF = pounds per square foot.-->
+                    <property>metrics/Sw-sqft</property> <!-- Área mojada en ft.-->
+                      <table>
+                          <independentVar>aero/alpha-rad</independentVar>
+                          <tableData> <!--Sabiendo que la pendiente de sustentación es 4.04 ^ -1 ([2]), y que CL=CLo+alpha*pendiente, armo una tabla con valores caracteristicos.-->          
+                              -0.2000	-0.7348	
+                              0.0000	0.0672	<!-- Coeficiente de sustentación para ángulo de ataque nulo. Clo. -->
+                              0.2670	0.8692 <!-- Coeficiente máximo donde empieza la perdida-->	
+                              0.4500	0.400 	<!-- Supongo un espesor de un 25% para el perfil para suavizar caida de sustentación.-->
+                          </tableData>
+                      </table>
+                </product>
+            </function>
+            <function name="aero/coefficient/CLde"> <!-- Coeficiente de sustentación del elevador. -->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>fcs/elevator-pos-rad</property>
+                    <value>0.9872</value> <!-- Valor del coeficiente. [1].-->
+                </product>
+            </function>
+        </axis>
+
+        <axis name="ROLL"> 
+            <!-- Momento de rollido. Intervienen los mismos fenomenos vistos en la
+            fuerza lateral, solo que aqui el momento no se calcula como el producto de la presión
+            dinamica por 
+            el valor del coeficiente, sino que el momento que realmente siente el modelo es el producto de la
+            presión dinámica, la envergadura y la superficie de referencia. De la misma forma en que
+            se desprecio el coeficiente parásito en el caso de la fuerza lateral, tambien se desprecia en los
+            momentos de rollido y guiñada ya que se presupone estabilidad aerodinamica. -->
+
+            <function name="aero/coefficient/Clb"> <!-- Coeficiente de momento de rollido debido al
+                ángulo de guiñada.-->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/beta-rad</property>
+                    <value>-0.0765</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Clp"> <!-- Coeficiente de amortiguamiento de rollido. -->
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/p-aero-rad_sec</property>
+                    <value>-0.4042</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Clr">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/r-aero-rad_sec</property>
+                    <value>0.0420</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Clda">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>fcs/left-aileron-pos-rad</property>
+                    <value>0.1202</value>
+                </product>
+            </function>
+
+        </axis>
+
+        <axis name="PITCH">
+
+            <function name="aero/coefficient/Cmo">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/cbarw-ft</property>
+                    <value>0.0227</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Cmalpha">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/cbarw-ft</property>
+                    <property>aero/alpha-rad</property>
+                    <value>-0.4629</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Cmq">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/cbarw-ft</property>
+                    <property>aero/ci2vel</property>
+                    <property>velocities/q-aero-rad_sec</property>
+                    <value>-1.3012</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/CmDe">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/cbarw-ft</property>
+                    <property>fcs/elevator-pos-rad</property>
+                    <value>-0.2292</value>
+                </product>
+            </function>
+
+        </axis>
+
+        <axis name="YAW">
+
+            <function name="aero/coefficient/Cnb">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/beta-rad</property>
+                    <value>0.0283</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Cnp">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/p-aero-rad_sec</property>
+                    <value>0.0044</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Cnr">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>aero/bi2vel</property>
+                    <property>velocities/r-aero-rad_sec</property>
+                    <value>-0.072</value>
+                </product>
+            </function>
+
+            <function name="aero/coefficient/Cnda">
+                <product>
+                    <property>aero/qbar-psf</property>
+                    <property>metrics/Sw-sqft</property>
+                    <property>metrics/bw-ft</property>
+                    <property>fcs/left-aileron-pos-rad</property>
+                    <value>0.1202</value>
+                </product>
+            </function>
+
+        </axis>
+
+
+    </aerodynamics>
+    
+</fdm_config>
