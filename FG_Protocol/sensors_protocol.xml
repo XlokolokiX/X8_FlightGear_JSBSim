@@ -5,51 +5,89 @@
        <line_separator>newline</line_separator>
        <var_separator>tab</var_separator>
 
+       <!-- Position -->
        <chunk>
-          <node>/instrumentation/gps/indicated-latitude-deg</node>
-          <name>gps-latitude</name>
+          <node>/position/latitude-deg</node>
+          <name>latitude-deg</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>
 
        <chunk>
-          <node>/instrumentation/gps/indicated-longitude-deg</node>
-          <name>gps-longitude</name>
+          <node>/position/longitude-deg</node>
+          <name>longitude-deg</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>
 
         <chunk>
-          <node>/instrumentation/gps/indicated-altitude-ft</node>
-          <name>gps-altitude-ft</name>
+          <node>/position/altitude-ft</node>
+          <name>altitude-ft</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <!-- Angles & Rates -->
+        <chunk>
+          <node>/orientation/track-deg</node>
+          <name>track-deg</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>
 
         <chunk>
-          <node>/instrumentation/altimeter/indicated-altitude-ft</node>
-          <name>altimeter-altitude</name>
+          <node>/orientation/pitch-deg</node>
+          <name>pitch-deg</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>
 
         <chunk>
-          <node>/instrumentation/attitude-indicator/indicated-pitch-deg</node>
-          <name>attitude-pitch</name>
+          <node>/orientation/roll-deg</node>
+          <name>roll-deg</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>
 
         <chunk>
-          <node>/instrumentation/attitude-indicator/indicated-roll-deg</node>
-          <name>attitude-roll</name>
+          <node>/orientation/true-heading-deg</node>
+          <name>heading-deg</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>
 
         <chunk>
-          <node>/instrumentation/magnetic-compass/indicated-heading-deg</node>
-          <name>magnetic-compass</name>
+          <node>/orientation/pitch-rate-degps</node>
+          <name>pitch-rate-degps</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/orientation/roll-rate-degps</node>
+          <name>roll-rate-degps</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/orientation/yaw-rate-degps</node>
+          <name>yaw-rate-degps</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <!-- Speeds -->
+        <chunk>
+          <node>/velocities/airspeed-kt</node>
+          <name>airspeed-kt</name>
+          <type>double</type>
+          <format>%03.13f</format>
+        </chunk>
+
+        <chunk>
+          <node>/velocities/groundspeed-kt</node>
+          <name>groundspeed-kt</name>
           <type>double</type>
           <format>%03.13f</format>
         </chunk>

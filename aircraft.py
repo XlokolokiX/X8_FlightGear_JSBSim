@@ -6,6 +6,7 @@ class Plane:
         self.ailerons = 0.0
         self.elevator = 0.0
         self.throttle = 0.0
+        self.weather = True
         self.__Address = Address
         self.__writing_Port = writing_Port
 
@@ -17,7 +18,7 @@ class Plane:
             raise
 
     def __updatePLane(self):
-        data = f'{self.ailerons},{self.elevator},{self.throttle}\n'
+        data = f'{self.ailerons},{self.elevator},{self.throttle},{self.weather},{self.weather},{self.weather},{self.weather}\n'
         try:
             self.writing_socket.sendto(data.encode('utf-8'), (self.__Address, self.__writing_Port))
             return True
@@ -34,6 +35,10 @@ class Plane:
     def setThrottle(self, value:float = 0.0):
         self.throttle = value
         self.__updatePLane()
+    def setWeather(self, enable:bool = True):
+        self.weather = enable
+        self.__updatePLane()
+        
     def getInstruments(self):
         return self.instruments
 

@@ -28,6 +28,35 @@
     <format>%f</format>
    </chunk>
    
+   <!-- Weather -->
+   <chunk>
+    <name>fdm-atmosphere</name>
+    <type>bool</type>
+    <node>/environment/params/control-fdm-atmosphere</node>
+    <format>%d</format>
+   </chunk>
+
+   <chunk>
+    <name>metar-environment</name>
+    <type>bool</type>
+    <node>/environment/params/metar-updates-environment</node>
+    <format>%d</format>
+   </chunk>
+
+   <chunk>
+    <name>metar-snow-level</name>
+    <type>bool</type>
+    <node>/environment/params/metar-updates-snow-level</node>
+    <format>%d</format>
+   </chunk>
+
+   <chunk>
+    <name>metar-winds</name>
+    <type>bool</type>
+    <node>/environment/params/metar-updates-winds-aloft</node>
+    <format>%d</format>
+   </chunk>
+
  </input>
  </generic>
 </PropertyList>

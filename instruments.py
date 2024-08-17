@@ -5,54 +5,56 @@ class Instruments:
     def __init__(self, address, listener_port):
         self.__address = address
         self.__listener_port = listener_port
-        self.gps:float = [0.0,0.0]
-        self.gpsAltitude:float = 0.0
-        self.altitude:float = 0.0
-        self.attitude:float = [0.0,0.0]
-        self.magneticHeading:float = 0.0
+        self.position:float = [0.0,0.0,0.0]
+        self.angles:float = [0.0,0.0,0.0]
+        self.rates:float = [0.0,0.0,0.0]
+        self.track:float = 0.0
+        self.airspeed:float = 0.0
+        self.groundspeed:float = 0.0
 
     def __UpdateInstrumentData(self):
         try:
+            
             listener_socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
             listener_socket.bind((self.__address, self.__listener_port))
-            data, addr = listener_socket.recvfrom(170)
+            data, addr = listener_socket.recvfrom(300)
             listener_socket.close()
 
             data = data.decode('utf-8').removesuffix('\n').split('\t')
             data = [float(num) for num in data]
-            self.gps[0] = data[0]           #latitude
-            self.gps[1] = data[1]           #longitude
-            self.gpsAltitude = data[2]      #altitude gps (M)
-            self.altitude = data[3]         #altitude sensor
-            self.attitude[0] = data[4]      #Pitch
-            self.attitude[1] = data[5]      #Roll
-            self.magneticHeading = data[6]  #Heading
+            self.position[0] = data[0]      #latitude-deg
+            self.position[1] = data[1]      #longitude-deg
+            self.position[2] = data[2]      #altitude-ft
+            self.track = data[3]            #track-deg
+            self.angles[0] = data[4]        #pith-deg
+            self.angles[1] = data[5]        #roll-deg
+            self.angles[2] = data[6]        #yaw-deg
+            self.rates[0] = data[7]         #pith-rate-deg_s
+            self.rates[1] = data[8]         #roll-rate-deg_s
+            self.rates[2] = data[9]         #yaw-rate-deg_s
+            self.airspeed = data[10]        #airspeed-kt
+            self.groundspeed = data[11]     #groundspeed-kt
+
         except socket.error as e:
             print(f'Error receiving data: {e}')
             return None
         return data
     
-    def __radians_to_mercator(self, lat_rad:float, lon_rad:float, radius=6371000):
-        x = radius * lon_rad
-        y = radius * math.log(math.tan(math.pi / 4 + lat_rad / 2))
-        return [x, y]
-
-    def getGPSradians(self):
+    def get_position(self):
         self.__UpdateInstrumentData()
-        return self.gps
-    
-    def getGPScoordinates(self):
-        gps = self.getGPSradians()
-        return self.__radians_to_mercator(gps[0], gps[1])
-    
-    def getGPSaltitude(self):
+        return self.position
+    def get_angles(self):
         self.__UpdateInstrumentData()
-        return self.gpsAltitude
-    
-    def getAttitude(self):
+        return self.angles
+    def get_rates(self):
         self.__UpdateInstrumentData()
-        return self.attitude
-    
-    def getmagneticHeading(self):
+        return self.rates
+    def get_track(self):
         self.__UpdateInstrumentData()
-        return self.magneticHeading
+        return self.track
+    def get_airspeed(self):
+        self.__UpdateInstrumentData()
+        return self.airspeed
+    def get_groundspeed(self):
+        self.__UpdateInstrumentData()
+        return self.groundspeed
